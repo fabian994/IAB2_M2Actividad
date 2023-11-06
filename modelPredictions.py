@@ -12,14 +12,14 @@ destination = 'model_birds.h5'
 gdown.download(url=link, output=destination, quiet=False, fuzzy=True)
 print('Finished Download')
 model = models.load_model('model_birds.h5')
-d = 'finalDataset/'
+d = 'finalDataset/content/finalDataset/'
 clList = os.listdir(d)
 
 # Selects 1 random image from a random class, five times
 def selectRandomPredictions():
   #print(len(clList))
   rng = np.random.default_rng()
-  r1 = rng.choice(70, size=5, replace=False)
+  r1 = rng.choice(69, size=5, replace=False)
   r2 = rng.choice(30, size=5, replace=False)
   imgList = []
   ImgLabel = []
@@ -41,8 +41,8 @@ for i in imgList:
 
   confidence = model.predict(img_tensor)
   predict_class = (confidence > 0.5).astype("int32")
-  print (confidence)
-  print ("class ", predict_class[0][0], "confindence", )
+  print(confidence)
+  print("class ", predict_class[0][0], "confindence", )
   predLst.append(predict_class[0][0])
   plt.imshow(img_tensor[0])
   plt.show()

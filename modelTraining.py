@@ -16,7 +16,7 @@ import pandas as pd
 
 def selectRandomPredictions():
   # Function selects 5 random images from 5 random classes, 1 images per class
-  d = 'finalDataset/'
+  d = 'finalDataset/content/finalDataset/'
   clList = os.listdir(d)
   #print(len(clList))
   rng = np.random.default_rng()
@@ -55,7 +55,7 @@ datagen = ImageDataGenerator(
     )
 
 train_generator = datagen.flow_from_directory(
-    'finalDataset/',
+    'finalDataset/content/finalDataset/',
     target_size = (img_height,img_width),
     batch_size = batch_size,
     class_mode ='sparse',
@@ -64,7 +64,7 @@ train_generator = datagen.flow_from_directory(
     )
 
 train_generator = datagen.flow_from_directory(
-    'finalDataset/',
+    'finalDataset/content/finalDataset/',
     target_size = (img_height,img_width),
     batch_size = batch_size,
     class_mode ='sparse',
@@ -76,7 +76,7 @@ train_generator = datagen.flow_from_directory(
 val_datagen = ImageDataGenerator(1./255)
 
 val_generator = val_datagen.flow_from_directory(
-							'finalDataset/',
+							'finalDataset/content/finalDataset/',
 							target_size = (150,150),
 							batch_size =20,
 							class_mode= 'sparse')
@@ -84,7 +84,7 @@ val_generator = val_datagen.flow_from_directory(
 # test generator
 test_datagen = ImageDataGenerator(1./255)
 
-test_generator = test_datagen.flow_from_directory('finalDataset',
+test_generator = test_datagen.flow_from_directory('finalDataset/content/finalDataset/',
                                                  shuffle=False,
                                                  batch_size=20,
                                                  target_size = (150,150),
