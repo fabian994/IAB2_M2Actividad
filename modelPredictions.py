@@ -6,10 +6,11 @@ import gdown
 from pyunpack import Archive
 import os
 
+print('Downloading Model...')
 link = 'https://drive.google.com/file/d/1ohgLWgpRDoal0qFAJI7xr-Bf7K2NqtUZ/view?usp=sharing'#model
 destination = 'model_birds.h5'
 gdown.download(url=link, output=destination, quiet=False, fuzzy=True)
-
+print('Finished Download')
 model = models.load_model('model_birds.h5')
 d = 'finalDataset/'
 clList = os.listdir(d)
