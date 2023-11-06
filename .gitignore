@@ -1,5 +1,7 @@
 *.jpg
 *.png
+*.zip
+*.7z
 CUB_200_2011*
 BirdFamilies
 finalDataset
