@@ -6,7 +6,5 @@ destination = 'finalDataset.zip'
 gdown.download(url=link, output=destination, quiet=False, fuzzy=True)
 Archive(destination).extractall('.')
 
-link = 'https://drive.google.com/file/d/1ohgLWgpRDoal0qFAJI7xr-Bf7K2NqtUZ/view?usp=sharing'#model
-destination = 'model_birds.h5'
-gdown.download(url=link, output=destination, quiet=False, fuzzy=True)
+
 #Archive(destination).extractall('.')
