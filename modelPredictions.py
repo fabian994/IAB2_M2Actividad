@@ -10,7 +10,6 @@ clList = os.listdir(d)
 
 # Selects 1 random image from a random class, five times
 def selectRandomPredictions():
-  
   #print(len(clList))
   rng = np.random.default_rng()
   r1 = rng.choice(70, size=5, replace=False)
