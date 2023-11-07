@@ -6,11 +6,11 @@ import gdown
 from pyunpack import Archive
 import os
 
-print('Downloading Model...')
+'''print('Downloading Model...')
 link = 'https://drive.google.com/file/d/1ohgLWgpRDoal0qFAJI7xr-Bf7K2NqtUZ/view?usp=sharing'#model
 destination = 'model_birds.h5'
 gdown.download(url=link, output=destination, quiet=False, fuzzy=True)
-print('Finished Download')
+print('Finished Download')'''
 model = models.load_model('model_birds.h5')
 d = 'finalDataset/content/finalDataset/'
 clList = os.listdir(d)
@@ -40,7 +40,8 @@ for i in imgList:
   img_tensor /= 255.
 
   confidence = model.predict(img_tensor)
-  predict_class = (confidence > 0.5).astype("int32")
+  predict_class = (confidence > 0.005).astype("int32")
+  print('pc:', predict_class)
   print(confidence)
   print("class ", predict_class[0][0], "confindence", )
   predLst.append(predict_class[0][0])
