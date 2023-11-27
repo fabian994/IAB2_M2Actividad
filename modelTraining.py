@@ -1,5 +1,5 @@
 # A01367585 Fabian Gonzalez Vera
-# CNN for multiclass clasification using Transfer learning from model VGG16
+# CNN for multiclass clasification using a Bilinear CNN based in the paper Bilinear CNN Models for Fine-grained Visual Recognition by Tsung-Yu Lin et al.
 
 import tensorflow
 import numpy as np

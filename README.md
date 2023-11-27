@@ -4,7 +4,7 @@ A01367585 | Fabian Gonzalez Vera
 
 En este repositorio se encuentra, una implementacion de una red neuronal convolucional utilizando el framework de TensorFlow y el usando el modelo VGG16 como base. El fin de esta implementacion es determinar la especie a la que pertenece un ave dado una imagen.
 
-Dentro del archivo [*eda.ipynb*](https://github.com/fabian994/IAB2_M2Actividad/blob/main/eda.ipynb) se realizo un EDA sencillo, la implementacion final del modelo se encuentra dentro del archivo [*modelTraining.py*](https://github.com/fabian994/IAB2_M2Actividad/blob/main/modelTraining.py), dentro del archivo [*modelPredictions.py*](https://github.com/fabian994/IAB2_M2Actividad/blob/main/modelPredictions.py) se encuentra un script para correr el modelo. Dentro del archivo [*setup.py*](https://github.com/fabian994/IAB2_M2Actividad/blob/main/setup.py) se encuentra un script para descargar los archivos necesarios para poder correr los scripts antes mencionados.
+Dentro del archivo *actividadM2.ipynb* se encuentra un EDA y el desarrollo de los modelos, la implementacion final del modelo se encuentra dentro del archivo [*modelTraining.py*](https://github.com/fabian994/IAB2_M2Actividad/blob/main/modelTraining.py), dentro del archivo [*modelPredictions.py*](https://github.com/fabian994/IAB2_M2Actividad/blob/main/modelPredictions.py) se encuentra un script para correr el modelo. Dentro del archivo [*setup.py*](https://github.com/fabian994/IAB2_M2Actividad/blob/main/setup.py) se encuentra un script para descargar los archivos necesarios para poder correr los scripts antes mencionados.
 
 
 
