@@ -96,5 +96,5 @@ predictions = model.predict(img_array)
 print('max value ',predictions[0].max())
 print('max val pos ',predictions[0].argmax())
 print("Predicted: ", clList[predictions[0].argmax()])
-plt.imshow(img_array[0])#cardinal
+plt.imshow(img_array[0])# correct pred is cardinal
 plt.show()
