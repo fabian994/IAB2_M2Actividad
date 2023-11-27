@@ -6,6 +6,8 @@ En este repositorio se encuentra, una implementacion de una red neuronal convolu
 
 Dentro del archivo *actividadM2.ipynb* se encuentra un EDA y el desarrollo de los modelos, la implementacion final del modelo se encuentra dentro del archivo [*modelTraining.py*](https://github.com/fabian994/IAB2_M2Actividad/blob/main/modelTraining.py), dentro del archivo [*modelPredictions.py*](https://github.com/fabian994/IAB2_M2Actividad/blob/main/modelPredictions.py) se encuentra un script para correr el modelo. Dentro del archivo [*setup.py*](https://github.com/fabian994/IAB2_M2Actividad/blob/main/setup.py) se encuentra un script para descargar los archivos necesarios para poder correr los scripts antes mencionados.
 
+Dentro de esta [*notebook*](https://drive.google.com/file/d/1Z4OuT1r8W_1CcSjvwe5d8okFpWpLPPFT/view?usp=sharing) se encuetra una implementacion funcionando.
+
 
 
 ## Requisitos Minimos
@@ -22,8 +24,7 @@ Dentro del archivo *actividadM2.ipynb* se encuentra un EDA y el desarrollo de lo
 
  1. Correr el archivo *setup.py*
  1. Para entrenar el modelo correr el archivo *modelTraining.py*
- 1. Para entrenar el modelo correr el archivo *modelPredictions.py*
-
+ 1. Para hacer predicciones el modelo correr el archivo *modelPredictions.py*
 
 
 ## Dataset
