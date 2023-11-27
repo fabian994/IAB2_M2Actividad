@@ -11,7 +11,7 @@ Dentro del archivo [*makeOwnPreds.py*](https://github.com/fabian994/IAB2_M2Activ
 Dentro del archivo [*setup.py*](https://github.com/fabian994/IAB2_M2Actividad/blob/main/setup.py) se encuentra un script para descargar el dataset para correr los archivos que hacen preddicciones, dentro de los archivos de preddicciones se descarga el modelo.
 
 Dentro de esta [*notebook de google colab*](https://drive.google.com/file/d/1Z4OuT1r8W_1CcSjvwe5d8okFpWpLPPFT/view?usp=sharing) se encuetra una implementacion funcionando. 
-[*Kaggle mirror*](hhttps://www.kaggle.com/code/fabi213/actividadm2)
+[*Kaggle mirror*](https://www.kaggle.com/code/fabi213/actividadm2) 
 
 Dentro de [*Reporte_ACT2_A01367585.pdf*](https://github.com/fabian994/IAB2_M2Actividad/blob/main/Reporte_ACT2_A01367585.pdf) se encuentra un reporte detallado del modelo.
 
