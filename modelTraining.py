@@ -2,6 +2,10 @@
 # CNN for multiclass clasification using a Bilinear CNN based in the paper Bilinear CNN Models for Fine-grained Visual Recognition by Tsung-Yu Lin et al.
 
 import tensorflow
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers
+import tensorflow_datasets as tfds
 import numpy as np
 import matplotlib.pyplot as plt
 import os
@@ -13,6 +17,14 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras import optimizers
 from tensorflow.keras.preprocessing import image
 import pandas as pd
+import seaborn as sns
+from tensorflow.keras import models
+from tensorflow.keras import layers
+from tensorflow.keras.applications import VGG16
+import IPython.display as display
+from PIL import Image
+import cv2
+from sklearn.metrics import accuracy_score, precision_score, recall_score
 
 def selectRandomPredictions():
   # Function selects 5 random images from 5 random classes, 1 images per class
@@ -32,104 +44,115 @@ def selectRandomPredictions():
   #print(len(imgLst), len(clImg))
   return imgList, ImgLabel
 
-# Previously extracted labels
-labels = [ 4,   7,  12,  13,  16,  17,  18,  20,  22,  24,  26,  28,
-        29,  31,  35,  36,  42,  44,  45,  46,  47,  49,  53,  55,  58,
-        59,  68,  70,  71,  73,  76,  77,  83,  84,  85,  86,  87,  88,
-        90,  91,  92,  93,  94,  95,  99, 101, 102, 103, 104, 105, 106,
-       108, 109, 110, 112, 117, 134, 138, 140, 143, 148, 150, 151, 178,
-       184, 185, 191, 193, 200]
-
-img_height,img_width = 150, 150
-batch_size = 20
-
-#Data augmentation & generators
-datagen = ImageDataGenerator( 
-    rescale = 1./255,
-    rotation_range = 40,
-    width_shift_range = 0.2,
-    height_shift_range = 0.2,
-    horizontal_flip = True,
-    vertical_flip = True,
+# Create dataset
+directory = 'finalDataset/content/finalDataset/'
+trainds, valds = tf.keras.utils.image_dataset_from_directory(directory,                  
+    batch_size=25,
+    image_size=(224, 224),
+    shuffle=True,
+    seed=123,
     validation_split=0.2,
-    )
+    subset='both')
+class_names = trainds.class_names
 
-train_generator = datagen.flow_from_directory(
-    'finalDataset/content/finalDataset/',
-    target_size = (img_height,img_width),
-    batch_size = batch_size,
-    class_mode ='sparse',
-    shuffle=True,
-    subset='training'
-    )
-
-train_generator = datagen.flow_from_directory(
-    'finalDataset/content/finalDataset/',
-    target_size = (img_height,img_width),
-    batch_size = batch_size,
-    class_mode ='sparse',
-    shuffle=True,
-    subset='training', seed = 123
-    )
-
-# validation generator
-val_datagen = ImageDataGenerator(1./255)
-
-val_generator = val_datagen.flow_from_directory(
-							'finalDataset/content/finalDataset/',
-							target_size = (150,150),
-							batch_size =20,
-							class_mode= 'sparse')
-
-# test generator
-test_datagen = ImageDataGenerator(1./255)
-
-test_generator = test_datagen.flow_from_directory('finalDataset/content/finalDataset/',
-                                                 shuffle=False,
-                                                 batch_size=20,
-                                                 target_size = (150,150),
-                                                 class_mode='sparse')
+# Change image size
+size = (224, 224)
+IMG_SIZE = 224
+trainds = trainds.map(lambda x, y: (tf.image.resize(x, size), y))
+valds = valds.map(lambda x, y: (tf.image.resize(x, size), y))
 
 
-# Model
-model = models.Sequential()
+data_augmentation = keras.Sequential(
+    [ 
+        layers.RandomFlip("horizontal_and_vertical"),
+        layers.RandomRotation(0.3),
+    ]
+)
+units =len(class_names)
 
-conv_base = VGG16(weights='imagenet',
+# Dnet
+DNet = keras.applications.Xception(weights='imagenet',
 								include_top = False,
-								input_shape = (150,150,3))
+								input_shape = (224,224,3))
+DNet.trainable = False
+DNet._name = 'DNet'
 
-model.add(conv_base)
-conv_base.trainable = False
-#model.add(layers.Conv2D(16, kernel_size=3, padding='same', strides = 3, activation="relu", input_shape=(150,150,3)))
-#model.add(layers.MaxPooling2D((3,3)))
-#model.add(layers.Conv2D(16, kernel_size=4, padding='same', strides = 2, activation="relu", input_shape=(150,150,3)))
-model.add(layers.MaxPooling2D((3,3)))
-model.add(layers.Flatten())
-model.add(layers.Dense(256,activation='relu'))
-model.add(layers.Dense(1,activation='softmax'))
+# M net
 
-model.summary()
+MNet = keras.applications.Xception(weights='imagenet',
+								include_top = False,
+								input_shape = (224,224,3))
+MNet.trainable = False
+MNet._name = 'MNet'
 
-model.compile(loss='categorical_crossentropy',
-						optimizer=optimizers.Adam(learning_rate=.005),
+# outer product
+def outer_product(x):
+    #outer product
+    op = tf.einsum('ijkm,ijkn->imn',x[0],x[1])
+    
+    # Reshape from [batch_size,depth,depth] to [batch_size, depth*depth]
+    op = tf.reshape(op,[-1,x[0].shape[3]*x[1].shape[3]])
+    
+    # Divide by feature map size [sizexsize]
+    size1 = int(x[1].shape[1])
+    size2 = int(x[1].shape[2])
+    op = tf.divide(op, size1*size2)
+    
+    # Take signed square root of phi_I
+    y_ssqrt = tf.multiply(tf.sign(op),tf.sqrt(tf.abs(op)+1e-12))
+    
+    # Apply l2 normalization
+    z_l2 = tf.nn.l2_normalize(y_ssqrt, axis=1)
+    return z_l2
+
+# model
+inputs = keras.Input(shape=(224, 224, 3),dtype='float32')
+BCNN = data_augmentation(inputs)
+scale_layer = keras.layers.Rescaling(scale=1 / 155, offset=-1)
+x = scale_layer(BCNN)
+
+#x = MNet(x, training=False)
+
+CNNA = DNet(x, training=False)
+CNNB = MNet(x, training=False)
+
+#CNNA = CNNA[:,:-1,:-1,:]
+bilinear = keras.layers.Lambda(outer_product, name='outer_product1')([CNNA,CNNB])
+
+
+# Flatten
+op = keras.layers.Flatten(name='flatten')(bilinear)#fl
+
+# Softmax
+outputs = keras.layers.Dense(units,name='softmax',activation='softmax')(op)
+
+model2 = keras.Model(inputs, outputs)
+
+model2.summary()
+
+model2.compile(loss='sparse_categorical_crossentropy',
+						optimizer=keras.optimizers.Adam(learning_rate=.03),
 						metrics=['acc'])
 
-history = model.fit(train_generator,
-				steps_per_epoch = 75,
-				epochs = 10,
-				validation_data = val_generator,
-				validation_steps = 25)
+history = model2.fit(trainds,
+				#steps_per_epoch = 75,
+				epochs = 70,
+				validation_data = valds,
+				validation_steps = 10)
 
-model.save('model_birds.h5')
+model2.save('xception.h5')
 
+frame = pd.DataFrame(history.history)
 
-
-acc = history.history['acc']
-val_acc = history.history['val_acc']
-loss = history.history['loss']
-val_loss = history.history['val_loss']
+acc = frame['acc']
+val_acc = frame['val_acc']
+loss = frame['loss']
+val_loss = frame['val_loss']
 
 epochs = range(1, len(acc)+1)
+
+#acc_plot = frame.plot(y="val_loss", title = "Loss vs Epochs",legend=False)
+#acc_plot.set(xlabel="Epochs", ylabel="Loss")
 
 plt.plot(epochs,acc,'bo',label='train accuracy')
 plt.plot(epochs,val_acc, 'b', label='validation accuracy')
@@ -145,34 +168,46 @@ plt.legend()
 
 plt.show()
 
+acc_plot = frame.plot(y="acc", title="Accuracy vs Epochs", legend=False)
+acc_plot.set(xlabel="Epochs", ylabel="Accuracy")
 
-# Test some predictions
+# metrics
 
-print('Some predictions: ')
-predictions = model.predict(test_generator)
+y_pred = []  # store predicted labels
+y_true = []  # store true labels
 
-imgList, ImgLabel = selectRandomPredictions()
-predLst = []
-for i in imgList:
-  img = image.load_img(i,  target_size=(150,150))
-  img_tensor = image.img_to_array(img)
-  img_tensor = np.expand_dims(img_tensor, axis = 0)
-  img_tensor /= 255.
+# iterate over the dataset
+for image_batch, label_batch in valds:   # use dataset.unbatch() with repeat
+   # append true labels
+   y_true.append(label_batch)
+   # compute predictions
+   preds = model2.predict(image_batch)
+   # append predicted labels
+   y_pred.append(np.argmax(preds, axis = - 1))
 
-  confidence = model.predict(img_tensor)
-  predict_class = (confidence > 0.5).astype("int32")
-  print (confidence)
-  print ("class ", predict_class[0][0], "confindence", )
-  predLst.append(predict_class[0][0])
-  plt.imshow(img_tensor[0])
-  plt.show()
+# convert the true and predicted labels into tensors
+correct_labels = tf.concat([item for item in y_true], axis = 0)
+predicted_labels = tf.concat([item for item in y_pred], axis = 0)
+
+yTrue = []
+YPred = []
+for i in correct_labels:
+    yTrue.append(class_names[i])
+for i in predicted_labels:
+    YPred.append(class_names[i])
+
+print("Overall Accuracy:",accuracy_score(yTrue, YPred))
+print("Overall Precision:",precision_score(yTrue, YPred, average='macro'))
+print("Overall Recall:",recall_score(yTrue, YPred, average='macro'))
 
 
-print('Confusion Matrix: ')
-y_pred = np.argmax(predictions, axis=1)
-y_true = test_generator.classes
-
-cm = confusion_matrix(y_true, y_pred,labels=labels)
-disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=labels)
-disp.plot()
+cm = confusion_matrix(yTrue, YPred)
+fig = plt.figure(figsize = (50,50))
+ax1 = fig.add_subplot(1,1,1)
+sns.set(font_scale=1.2) #for label size
+sns.heatmap(cm, annot=True, annot_kws={"size": 12},
+     cbar = False, cmap='Purples')#,xticklabels=class_names, yticklabels=class_names);
+ax1.set_ylabel('True Values',fontsize=12)
+ax1.set_xlabel('Predicted Values',fontsize=12)
+plt.savefig('confM_xcep.png', dpi = 300)
 plt.show()
